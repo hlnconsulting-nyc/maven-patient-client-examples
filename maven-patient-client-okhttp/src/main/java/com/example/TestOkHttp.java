@@ -10,13 +10,8 @@ import okhttp3.FormBody;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 
-public class Test
+public class TestOkHttp
 {
-    private static final String oauthServer =
-            "https://cir-internal-app.health.dohmh.nycnet/auth/realms/nyc-cir/protocol/openid-connect/token";
-    private static final String clientId = "maven";
-    private static final String clientSecret = "[secret here]";
-
     public static void main(final String[] argv) throws Exception
     {
         final OkHttpClient okHttpClient = new OkHttpClient.Builder().addInterceptor(chain ->
@@ -25,9 +20,9 @@ public class Test
             if (request.header("Authorization") == null)
             {
                 final String accessToken = (String) new Gson().fromJson(new OkHttpClient().newCall(new Request.Builder()
-                        .post(new FormBody.Builder().add("client_id", clientId).add("client_secret", clientSecret)
-                                .add("grant_type", "client_credentials").build()).url(oauthServer).build()).execute().body()
-                        .string(), Map.class).get("access_token");
+                        .post(new FormBody.Builder().add("client_id", TestProperties.clientId)
+                                .add("client_secret", TestProperties.clientId).add("grant_type", "client_credentials").build())
+                        .url(TestProperties.oauthServer).build()).execute().body().string(), Map.class).get("access_token");
 
                 request = request.newBuilder().addHeader("Authorization", "Bearer " + accessToken).build();
             }
@@ -36,7 +31,7 @@ public class Test
         }).build();
 
         final MavenPatientControllerApi api = new MavenPatientControllerApi(new ApiClient(okHttpClient));
-        final Patient patient = api.findById(1L);
+        final Patient patient = api.findById(TestProperties.patientId);
         System.out.println(patient.getPatientId());
     }
 }
