@@ -12,25 +12,20 @@ import com.example.api.MavenPatientControllerApi;
 import com.example.model.Patient;
 
 @SpringBootApplication
-public class TestApplication implements CommandLineRunner
+public class TestRestTemplate implements CommandLineRunner
 {
-    private static final String oauthServer =
-            "https://cir-internal-app.health.dohmh.nycnet/auth/realms/nyc-cir/protocol/openid-connect/token";
-    private static final String clientId = "maven";
-    private static final String clientSecret = "[secret here]";
-
     public static void main(final String[] argv)
     {
-        SpringApplication.run(TestApplication.class, argv);
+        SpringApplication.run(TestRestTemplate.class, argv).close();
     }
 
     @Bean
     public RestTemplate restTemplate()
     {
         final ClientCredentialsResourceDetails clientCredentialsResourceDetails = new ClientCredentialsResourceDetails();
-        clientCredentialsResourceDetails.setAccessTokenUri(oauthServer);
-        clientCredentialsResourceDetails.setClientId(clientId);
-        clientCredentialsResourceDetails.setClientSecret(clientSecret);
+        clientCredentialsResourceDetails.setAccessTokenUri(TestProperties.oauthServer);
+        clientCredentialsResourceDetails.setClientId(TestProperties.clientId);
+        clientCredentialsResourceDetails.setClientSecret(TestProperties.clientSecret);
 
         return new OAuth2RestTemplate(clientCredentialsResourceDetails);
     }
@@ -39,7 +34,7 @@ public class TestApplication implements CommandLineRunner
     public void run(final String[] argv)
     {
         final MavenPatientControllerApi api = new MavenPatientControllerApi(new ApiClient(restTemplate()));
-        final Patient patient = api.findById(1L);
+        final Patient patient = api.findById(TestProperties.patientId);
         System.out.println(patient.getPatientId());
     }
 }
